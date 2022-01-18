@@ -17,7 +17,7 @@ async function addDatabaseItem(title, url) {
         throw Error("No databaseId setup for Notion")
     }
     try {
-        const response = await notion.pages.create({
+        await notion.pages.create({
             parent: {
                 "type": "database_id",
                 "database_id": databaseId
@@ -33,10 +33,6 @@ async function addDatabaseItem(title, url) {
                 }
             },
         })
-        console.log(response)
-        if (response.url) {
-            return response.url
-        }
         console.log("Success! Entry added.")
     } catch (error) {
         console.error(error.body)
@@ -44,7 +40,7 @@ async function addDatabaseItem(title, url) {
 }
 
 export default class HackerNewsController {
-    public async index(ctx: HttpContextContract) {
+    public async index(_: HttpContextContract) {
         let url = 'https://hacker-news.firebaseio.com/v0/topstories.json';
         async function getStories(): Promise<number[]> {
             try {
