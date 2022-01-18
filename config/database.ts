@@ -8,6 +8,15 @@
 import Env from '@ioc:Adonis/Core/Env'
 import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
 
+import { parse } from "pg-connection-string"
+const dbCreds = parse(Env.get('DATABASE_URL'))
+
+// dbCreds.host = dbCreds.host ? dbCreds.host : Env.get('PG_HOST')
+// dbCreds.port = (dbCreds.port ? dbCreds.port : Env.get('PG_PORT')) as any
+// dbCreds.user = dbCreds.user ? dbCreds.user : Env.get('PG_USER')
+// dbCreds.password = dbCreds.password ? dbCreds.password : Env.get('PG_PASSWORD')
+// dbCreds.database = dbCreds.database ? dbCreds.database : Env.get('PG_DB_NAME')
+
 const databaseConfig: DatabaseConfig = {
   /*
   |--------------------------------------------------------------------------
@@ -36,11 +45,11 @@ const databaseConfig: DatabaseConfig = {
     pg: {
       client: 'pg',
       connection: {
-        host: Env.get('PG_HOST'),
-        port: Env.get('PG_PORT'),
-        user: Env.get('PG_USER'),
-        password: Env.get('PG_PASSWORD', ''),
-        database: Env.get('PG_DB_NAME'),
+        host: dbCreds.host || Env.get('PG_HOST'),
+        port: Number.parseInt(dbCreds.port as string, 10) || Env.get('PG_PORT'),
+        user: dbCreds.user || Env.get('PG_USER'),
+        password: dbCreds.password || Env.get('PG_PASSWORD', ''),
+        database: dbCreds.database || Env.get('PG_DB_NAME'),
         ssl: {
           rejectUnauthorized: false
         }
