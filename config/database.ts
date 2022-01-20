@@ -9,7 +9,12 @@ import Env from '@ioc:Adonis/Core/Env'
 import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
 
 import { parse } from "pg-connection-string"
-const dbCreds = parse(Env.get('DATABASE_URL'))
+let dbCreds = {}
+try {
+  dbCreds = parse(Env.get('DATABASE_URL'))
+} catch (e) {
+}
+
 
 // dbCreds.host = dbCreds.host ? dbCreds.host : Env.get('PG_HOST')
 // dbCreds.port = (dbCreds.port ? dbCreds.port : Env.get('PG_PORT')) as any
