@@ -60,6 +60,15 @@
     "picomatch" "^2.3.0"
     "slash" "^3.0.0"
 
+"@adonisjs/auth@^8.0.10":
+  "integrity" "sha512-jE2C0btUresr1pRV1P8NAehSJlebJ+TlrQp1p1ws52AQ5h4ayjzTniZBtq6pSgm5uv6TAEQ7Mw7ZfTOwaA8MBQ=="
+  "resolved" "https://registry.npmjs.org/@adonisjs/auth/-/auth-8.0.10.tgz"
+  "version" "8.0.10"
+  dependencies:
+    "@poppinss/hooks" "^3.0.5"
+    "@poppinss/utils" "^3.2.0"
+    "luxon" "^2.0.2"
+
 "@adonisjs/bodyparser@^8.0.0", "@adonisjs/bodyparser@^8.0.1":
   "integrity" "sha512-7iXJXR8rx/hcaFdkYRyTADAuQvOsdr5HMlAZzL9sdnBXuM1nGdI/Uis3YQ2oD4M/b1t4dpU02LMJsDDYxyRIgA=="
   "resolved" "https://registry.npmjs.org/@adonisjs/bodyparser/-/bodyparser-8.0.1.tgz"
@@ -81,7 +90,7 @@
   dependencies:
     "@poppinss/utils" "^3.1.4"
 
-"@adonisjs/core@^5.1.0", "@adonisjs/core@^5.4.1":
+"@adonisjs/core@^5.1.0", "@adonisjs/core@^5.1.1", "@adonisjs/core@^5.4.1":
   "integrity" "sha512-/WNeB75A6nfr1sxeCsFpi87MuCmi/DZNpATM71TO4xwgMDlW1m8GGZqtqSE8+QVs1sd+vhgiHZOdVmZp2BLD4A=="
   "resolved" "https://registry.npmjs.org/@adonisjs/core/-/core-5.4.1.tgz"
   "version" "5.4.1"
@@ -197,7 +206,7 @@
     "abstract-logging" "^2.0.1"
     "pino" "^6.13.2"
 
-"@adonisjs/lucid@^16.3.2":
+"@adonisjs/lucid@^16.0.0", "@adonisjs/lucid@^16.3.2":
   "integrity" "sha512-RFY3wVGJ04KlhkvLxsNkkLgDa8v1OpVB6F6D2vwW+jHKpAOSvYc/fzvQE6RoCpdP7vfn3VcO5iikDqtXopM6KQ=="
   "resolved" "https://registry.npmjs.org/@adonisjs/lucid/-/lucid-16.3.2.tgz"
   "version" "16.3.2"
@@ -247,6 +256,14 @@
     "pirates" "^4.0.1"
     "rev-hash" "^3.0.0"
     "source-map-support" "^0.5.19"
+
+"@adonisjs/session@^6.0.0", "@adonisjs/session@^6.1.2":
+  "integrity" "sha512-xXmn93b32XruL/zJ+h9Dea/RGneMhenp369PA55VV9Fnxjxf3ElmqMnZYoJ5HYCxbey0NnNODZ9co74+PCVbtw=="
+  "resolved" "https://registry.npmjs.org/@adonisjs/session/-/session-6.1.2.tgz"
+  "version" "6.1.2"
+  dependencies:
+    "@poppinss/utils" "^3.2.0"
+    "fs-extra" "^10.0.0"
 
 "@adonisjs/sink@^5.1.6":
   "integrity" "sha512-N6y4AnRvK1sw9vlq48fQzJuF6H8m3D9JQyqS+RhGHb7B8xRWo3NWhREspyISguDNIfoAoR7Am4ETykt+OGikNQ=="

@@ -24,9 +24,11 @@
   },
   "dependencies": {
     "@adonisjs/ally": "^4.1.1",
+    "@adonisjs/auth": "^8.0.10",
     "@adonisjs/core": "^5.4.1",
     "@adonisjs/lucid": "^16.3.2",
     "@adonisjs/repl": "^3.1.7",
+    "@adonisjs/session": "^6.1.2",
     "@notionhq/client": "^0.4.11",
     "dotenv": "^10.0.0",
     "luxon": "^2.1.1",

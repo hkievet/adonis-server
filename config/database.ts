@@ -8,8 +8,8 @@
 import Env from '@ioc:Adonis/Core/Env'
 import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
 
-import { parse } from "pg-connection-string"
-let dbCreds = {}
+import { parse, ConnectionOptions } from "pg-connection-string"
+let dbCreds: Partial<ConnectionOptions> = {}
 try {
   dbCreds = parse(Env.get('DATABASE_URL'))
 } catch (e) {
@@ -21,6 +21,10 @@ try {
 // dbCreds.user = dbCreds.user ? dbCreds.user : Env.get('PG_USER')
 // dbCreds.password = dbCreds.password ? dbCreds.password : Env.get('PG_PASSWORD')
 // dbCreds.database = dbCreds.database ? dbCreds.database : Env.get('PG_DB_NAME')
+
+const sslProp = Object.keys(dbCreds).length ? {
+  rejectUnauthorized: false
+} : undefined
 
 const databaseConfig: DatabaseConfig = {
   /*
@@ -55,9 +59,7 @@ const databaseConfig: DatabaseConfig = {
         user: dbCreds.user || Env.get('PG_USER'),
         password: dbCreds.password || Env.get('PG_PASSWORD', ''),
         database: dbCreds.database || Env.get('PG_DB_NAME'),
-        ssl: {
-          rejectUnauthorized: false
-        }
+        ssl: sslProp
       },
       migrations: {
         naturalSort: true,
@@ -68,5 +70,6 @@ const databaseConfig: DatabaseConfig = {
 
   }
 }
+
 
 export default databaseConfig

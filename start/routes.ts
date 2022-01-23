@@ -21,6 +21,9 @@ import fetch from 'node-fetch'
 
 import Route from '@ioc:Adonis/Core/Route'
 import Ship from 'App/Models/Ship'
+import allyConfig from 'Config/ally';
+import User from 'App/Models/User';
+import Env from '@ioc:Adonis/Core/Env'
 
 export const PDX_COORDS = {
   lat: 45.5152,
@@ -124,7 +127,6 @@ Route.get('/github/redirect', async ({ ally }) => {
 Route.get('/github/callback', async ({ ally }) => {
   const github = ally.use('github')
 
-
   /**
    * User has explicitly denied the login request
    */
@@ -153,3 +155,57 @@ Route.get('/github/callback', async ({ ally }) => {
   console.log(user)
   console.log("boom")
 })
+
+Route.get('/github/checkToken', async ({ request, ally, auth }) => {
+  let code = request.headers().authorization
+  if (code?.indexOf("Bearer") !== -1) {
+    code = code!.substring(7).trim()
+    const payload = { client_id: allyConfig.github.clientId, code: code, client_secret: allyConfig.github.clientSecret, redirect_uri: `${Env.get('CLIENT_SITE')}/success` }
+    let urlParameters = Object.entries(payload).map(e => e.join('=')).join('&');
+    const response = await fetch(`https://github.com/login/oauth/access_token?${urlParameters}`, { method: "post" })
+    const data = await response.text()
+    console.log(data)
+    const token = data.split('=')[1].split('&')[0]
+    console.log(token)
+    const githubUser = await ally
+      .use('github')
+      .userFromToken(token)
+
+    console.log(githubUser)
+    if (!githubUser.email || !githubUser.token.token) {
+      return
+    }
+
+    const verified = githubUser.emailVerificationState
+    const email = githubUser.email
+    const accessToken = githubUser.token.token
+
+    const user = await User.firstOrCreate({
+      email: email,
+    }, {
+      email: email,
+      isVerified: verified === 'verified',
+      accessToken
+    })
+
+    await auth.use('web').login(user, true)
+    return
+  }
+})
+
+Route.get("/isLoggedIn", async ({ auth }) => {
+  console.log("boom")
+  try {
+    await auth.use('web').authenticate()
+  } catch (e) {
+    console.log(e)
+  }
+  console.log(auth.use('web').user!)
+  return { loggedIn: auth.use('web').isLoggedIn }
+})
+
+Route.get('/logout', async ({ auth, response }) => {
+  await auth.use('web').logout()
+  response.redirect(`${Env.get('CLIENT_SITE')}/login`)
+})
+

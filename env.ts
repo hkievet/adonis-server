@@ -28,4 +28,6 @@ export default Env.rules({
   PG_DB_NAME: Env.schema.string(),
   GITHUB_CLIENT_ID: Env.schema.string(),
   GITHUB_CLIENT_SECRET: Env.schema.string(),
+  SESSION_DRIVER: Env.schema.string(),
+  CLIENT_SITE: Env.schema.string()
 })
