@@ -160,7 +160,8 @@ Route.get('/github/checkToken', async ({ request, ally, auth }) => {
   let code = request.headers().authorization
   if (code?.indexOf("Bearer") !== -1) {
     code = code!.substring(7).trim()
-    const payload = { client_id: allyConfig.github.clientId, code: code, client_secret: allyConfig.github.clientSecret, redirect_uri: `${Env.get('CLIENT_SITE')}/success` }
+    // const payload = { client_id: allyConfig.github.clientId, code: code, client_secret: allyConfig.github.clientSecret, redirect_uri: `${Env.get('CLIENT_SITE')}/success` }
+    const payload = { client_id: allyConfig.github.clientId, code: code, client_secret: allyConfig.github.clientSecret }
     let urlParameters = Object.entries(payload).map(e => e.join('=')).join('&');
     const response = await fetch(`https://github.com/login/oauth/access_token?${urlParameters}`, { method: "post" })
     const data = await response.text()
