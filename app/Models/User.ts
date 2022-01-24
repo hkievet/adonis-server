@@ -15,6 +15,12 @@ export default class User extends BaseModel {
   public rememberMeToken?: string
 
   @column()
+  public notionToken?: string
+
+  @column()
+  public notionTableUri?: string
+
+  @column()
   public isVerified?: boolean
 
   @column.dateTime({ autoCreate: true })
@@ -22,5 +28,4 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
-
 }

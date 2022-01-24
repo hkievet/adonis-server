@@ -31,7 +31,6 @@ import User from 'App/Models/User'
 |****************************************************************
 */
 export const { actions } = Bouncer.define('heezyklovaday', (user: User) => {
-    console.log(user)
     return user.email === "hkievet@gmail.com"
 })
 

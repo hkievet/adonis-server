@@ -17,7 +17,7 @@
 | import './routes/customer'
 |
 */
-import fetch from 'node-fetch'
+import fetch, { Headers } from 'node-fetch'
 
 import Route from '@ioc:Adonis/Core/Route'
 import Ship from 'App/Models/Ship'
@@ -154,8 +154,6 @@ Route.get('/github/callback', async ({ ally }) => {
    * Finally, access the user
    */
   const user = await github.user()
-  console.log(user)
-  console.log("boom")
 })
 
 Route.get('/github/checkToken', async ({ request, ally, auth }) => {
@@ -207,4 +205,69 @@ Route.get('/logout', async ({ auth, response }) => {
   await auth.use('web').logout()
   response.redirect(`${Env.get('CLIENT_SITE')}/login`)
 })
+
+
+Route.post('/notion/authenticate', async ({ request, ally, auth }) => {
+  const user = auth.user
+  const body = request.body()
+  let code = body.code
+  const authToken = Buffer.from(`${Env.get("NOTION_CLIENT")}:${Env.get("NOTION_SECRET")}`).toString("base64")
+  const authPayload = `Basic ${authToken}`
+  // const authToken = `Basic ${Env.get("NOTION_CLIENT")}:${Env.get("NOTION_SECRET")}`
+
+  try {
+    const results = await fetch("https://api.notion.com/v1/oauth/token", {
+      method: "post",
+      headers: new Headers({ "Authorization": authPayload, 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        code,
+        "grant_type": "authorization_code",
+        "redirect_uri": `${Env.get('CLIENT_SITE')}/notion-success`
+      })
+    })
+    const data = await results.json()
+    console.log(data)
+    if (data['access_token'] && user) {
+      user.notionToken = data["access_token"]
+      user.save()
+      console.log("updated notion token for user...")
+    }
+  } catch (e) {
+    console.error(e)
+  }
+  return { code }
+}).middleware('auth:web')
+
+Route.post('/notion/database-uri', async ({ response, request, auth }) => {
+  const body = request.body()
+  let databaseId = body.databaseId
+  const user = auth.user
+  console.log(user)
+  if (!user?.notionToken) {
+    response.status(500)
+    return
+  }
+  if (databaseId) {
+    user.notionTableUri = databaseId
+    user.save()
+    console.log(user?.notionTableUri)
+  }
+}).middleware('auth:web')
+
+// lists the endpoints
+Route.post('/notion/list', async ({ response, request, auth }) => {
+  const body = request.body()
+  let databaseId = body.databaseId
+  const user = auth.user
+  console.log(user)
+  if (!user?.notionToken) {
+    response.status(500)
+    return
+  }
+  if (databaseId) {
+    user.notionTableUri = databaseId
+    user.save()
+    console.log(user?.notionTableUri)
+  }
+}).middleware('auth:web')
 
