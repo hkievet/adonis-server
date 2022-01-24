@@ -40,7 +40,8 @@ async function addDatabaseItem(title, url) {
 }
 
 export default class HackerNewsController {
-    public async index(_: HttpContextContract) {
+    public async index({ bouncer }) {
+        await bouncer.authorize('heezyklovaday')
         let url = 'https://hacker-news.firebaseio.com/v0/topstories.json';
         async function getStories(): Promise<number[]> {
             try {
@@ -76,7 +77,8 @@ export default class HackerNewsController {
 
         return populatedItems
     }
-    public async store({ request }: HttpContextContract) {
+    public async store({ request, bouncer }: HttpContextContract) {
+        await bouncer.authorize('heezyklovaday')
         if (request.hasBody()) {
             const body = request.body()
             if (body.hnId && body.isFavorited) {
@@ -94,7 +96,8 @@ export default class HackerNewsController {
             }
         }
     }
-    public async update({ request, params }: HttpContextContract) {
+    public async update({ request, params, bouncer }: HttpContextContract) {
+        await bouncer.authorize('heezyklovaday')
         const { id } = params
         if (request.hasBody() && id) {
             const body = request.body()
@@ -111,7 +114,8 @@ export default class HackerNewsController {
         }
     }
 
-    public async show({ params }: HttpContextContract) {
+    public async show({ params, bouncer }: HttpContextContract) {
+        await bouncer.authorize('heezyklovaday')
         const { id } = params
         const existing = await HnStory.findByOrFail('hnId', id)
         const storyData = await existing.getStoryData()

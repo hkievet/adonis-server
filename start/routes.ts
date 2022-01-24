@@ -30,7 +30,9 @@ export const PDX_COORDS = {
   lon: -122.6784,
 };
 
-Route.resource('hn_news', 'HackerNewsController')
+Route.group(() => {
+  Route.resource('hn_news', 'HackerNewsController')
+}).middleware('auth:web')
 
 Route.get('/', async () => {
   return { hello: 'world' }
@@ -165,14 +167,11 @@ Route.get('/github/checkToken', async ({ request, ally, auth }) => {
     let urlParameters = Object.entries(payload).map(e => e.join('=')).join('&');
     const response = await fetch(`https://github.com/login/oauth/access_token?${urlParameters}`, { method: "post" })
     const data = await response.text()
-    console.log(data)
     const token = data.split('=')[1].split('&')[0]
-    console.log(token)
     const githubUser = await ally
       .use('github')
       .userFromToken(token)
 
-    console.log(githubUser)
     if (!githubUser.email || !githubUser.token.token) {
       return
     }
@@ -195,13 +194,12 @@ Route.get('/github/checkToken', async ({ request, ally, auth }) => {
 })
 
 Route.get("/isLoggedIn", async ({ auth }) => {
-  console.log("boom")
   try {
     await auth.use('web').authenticate()
   } catch (e) {
-    console.log(e)
+    // console.log(e)
+    // throw new Error("unable to auth...")
   }
-  console.log(auth.use('web').user!)
   return { loggedIn: auth.use('web').isLoggedIn }
 })
 
