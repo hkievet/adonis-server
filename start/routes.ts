@@ -154,7 +154,7 @@ Route.get('/github/callback', async ({ ally }) => {
   /**
    * Finally, access the user
    */
-  const user = await github.user()
+  // const user = await github.user()
 })
 
 Route.get('/github/checkToken', async ({ request, ally, auth }) => {
@@ -208,7 +208,7 @@ Route.get('/logout', async ({ auth, response }) => {
 })
 
 
-Route.post('/notion/authenticate', async ({ request, ally, auth }) => {
+Route.post('/notion/authenticate', async ({ request, auth }) => {
   const user = auth.user
   const body = request.body()
   let code = body.code
