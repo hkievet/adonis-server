@@ -24,6 +24,7 @@ import Ship from 'App/Models/Ship'
 import allyConfig from 'Config/ally';
 import User from 'App/Models/User';
 import Env from '@ioc:Adonis/Core/Env'
+import { Client } from '@notionhq/client/build/src';
 
 export const PDX_COORDS = {
   lat: 45.5152,
@@ -254,20 +255,60 @@ Route.post('/notion/database-uri', async ({ response, request, auth }) => {
   }
 }).middleware('auth:web')
 
-// lists the endpoints
-Route.post('/notion/list', async ({ response, request, auth }) => {
-  const body = request.body()
-  let databaseId = body.databaseId
+
+Route.post('/notion/search', async ({ auth }) => {
   const user = auth.user
-  console.log(user)
-  if (!user?.notionToken) {
-    response.status(500)
-    return
-  }
-  if (databaseId) {
-    user.notionTableUri = databaseId
-    user.save()
-    console.log(user?.notionTableUri)
+  if (user?.notionToken) {
+    console.log(user.notionToken)
+    const notion = new Client({
+      auth: user.notionToken
+    })
+    const results = await notion.search({
+      filter: {
+        property: "object",
+        value: "database"
+      }
+    })
+    /**
+     * {
+        object: 'list',
+        results: [ { object: 'page', id: 'd321f629-8f6c-4dd3-bcec-83999eecaec2' } ],
+        next_cursor: null,
+        has_more: false
+      }
+     */
+    console.log(results)
   }
 }).middleware('auth:web')
 
+Route.get('/notion/settings', async ({ auth }) => {
+  const user = auth.user
+  const results = {
+    notionAuthenticated: false,
+    notionPages: [] as string[],
+    selectedNotionPage: "",
+  }
+
+  if (user?.notionToken) {
+    results.notionAuthenticated = true
+    const notion = new Client({
+      auth: user.notionToken
+    })
+    const searchResults = await notion.search({
+      filter: {
+        property: "object",
+        value: "database"
+      }
+    })
+
+    if (searchResults) {
+      results.notionPages = searchResults.results.map((result) => {
+        return result.id
+      })
+    }
+    if (user?.notionTableUri) {
+      results.selectedNotionPage = user.notionTableUri
+    }
+  }
+  return results
+}).middleware('auth:web')

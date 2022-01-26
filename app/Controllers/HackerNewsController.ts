@@ -3,16 +3,10 @@ import HnStory from 'App/Models/HnStory'
 import fetch from 'node-fetch';
 import { Client } from '@notionhq/client'
 
-if (!process.env.NOTION_TOKEN) {
-    throw Error("No NOTION_TOKEN found in process")
-}
-const notion = new Client({
-    auth: process.env.NOTION_TOKEN,
-})
-
-const databaseId = process.env.NOTION_DB
-
-async function addDatabaseItem(title, url) {
+async function addDatabaseItem(title: string, url: string, databaseId: string, notionToken: string) {
+    const notion = new Client({
+        auth: notionToken,
+    })
     if (!databaseId) {
         throw Error("No databaseId setup for Notion")
     }
@@ -96,10 +90,11 @@ export default class HackerNewsController {
             }
         }
     }
-    public async update({ request, params, bouncer }: HttpContextContract) {
+    public async update({ request, params, bouncer, auth }: HttpContextContract) {
         await bouncer.authorize('heezyklovaday')
+        const user = auth.user
         const { id } = params
-        if (request.hasBody() && id) {
+        if (request.hasBody() && id && user?.notionToken && user.notionTableUri) {
             const body = request.body()
             if (body.isFavorited !== undefined) {
                 const existing = await HnStory.findByOrFail('hnId', id)
@@ -107,7 +102,9 @@ export default class HackerNewsController {
                 existing.save()
                 const storyData = await existing.getStoryData()
                 if (existing.isFavorited) {
-                    await addDatabaseItem(storyData.title, storyData.url)
+                    await addDatabaseItem(storyData.title, storyData.url,
+                        user.notionTableUri, user.notionToken)
+
                 }
                 return { ...existing.$attributes, ...storyData }
             }
