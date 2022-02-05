@@ -1,8 +1,6 @@
 import { DateTime } from 'luxon'
-import { column, BaseModel, hasMany, HasMany, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
-import Favorite from './Favorite'
+import { column, BaseModel, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
 import HnStory from './HnStory'
-import Hnstories from 'Database/migrations/1640041347974_hnstories'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })

@@ -250,20 +250,20 @@ Route.post('/notion/database-uri', async ({ response, request, auth }) => {
 }).middleware('auth:web')
 
 
-Route.post('/notion/search', async ({ auth }) => {
-  const user = auth.user
-  if (user?.notionToken) {
-    const notion = new Client({
-      auth: user.notionToken
-    })
-    const results = await notion.search({
-      filter: {
-        property: "object",
-        value: "database"
-      }
-    })
-  }
-}).middleware('auth:web')
+// Route.post('/notion/search', async ({ auth }) => {
+//   const user = auth.user
+//   if (user?.notionToken) {
+//     const notion = new Client({
+//       auth: user.notionToken
+//     })
+//     const results = await notion.search({
+//       filter: {
+//         property: "object",
+//         value: "database"
+//       }
+//     })
+//   }
+// }).middleware('auth:web')
 
 Route.get('/notion/settings', async ({ auth }) => {
   const user = auth.user
