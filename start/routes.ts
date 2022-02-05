@@ -268,6 +268,7 @@ Route.post('/notion/database-uri', async ({ response, request, auth }) => {
 Route.get('/notion/settings', async ({ auth }) => {
   const user = auth.user
   const results = {
+    isAuthenticated: !!user,
     notionAuthenticated: false,
     notionPages: [] as string[],
     selectedNotionPage: "",
