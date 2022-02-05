@@ -1,9 +1,11 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany, ManyToMany, manyToMany } from '@ioc:Adonis/Lucid/Orm'
 import fetch from 'node-fetch'
+import User from './User'
 
 export default class HnStory extends BaseModel {
   public static table = 'hnstories'
+
   @column({ isPrimary: true })
   public id: number
 
@@ -17,9 +19,6 @@ export default class HnStory extends BaseModel {
   public hnId: number
 
   @column()
-  public isFavorited: boolean
-
-  @column()
   public title: string
 
   @column()
@@ -30,6 +29,16 @@ export default class HnStory extends BaseModel {
 
   @column()
   public notionUrl: string | null
+
+  @manyToMany(() => User, {
+    localKey: 'id',
+    relatedKey: 'id',
+    pivotTable: 'favorites',
+    pivotRelatedForeignKey: 'user_id',
+    pivotForeignKey: 'hnstories_id',
+  })
+  public users: ManyToMany<typeof User>
+
 
   public getStoryData() {
     return HnStory.getStory(this.hnId)

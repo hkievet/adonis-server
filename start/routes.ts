@@ -45,7 +45,6 @@ Route.get('/name', async () => {
 
 Route.post('/echo', async ({ request }) => {
   if (request.hasBody()) {
-    console.log(request.body())
     return request.body()
   }
   return { test: "boom" }
@@ -196,8 +195,7 @@ Route.get("/isLoggedIn", async ({ auth }) => {
   try {
     await auth.use('web').authenticate()
   } catch (e) {
-    // console.log(e)
-    // throw new Error("unable to auth...")
+
   }
   return { loggedIn: auth.use('web').isLoggedIn }
 })
@@ -227,11 +225,9 @@ Route.post('/notion/authenticate', async ({ request, auth }) => {
       })
     })
     const data = await results.json()
-    console.log(data)
     if (data['access_token'] && user) {
       user.notionToken = data["access_token"]
       user.save()
-      console.log("updated notion token for user...")
     }
   } catch (e) {
     console.error(e)
@@ -243,7 +239,6 @@ Route.post('/notion/database-uri', async ({ response, request, auth }) => {
   const body = request.body()
   let databaseId = body.databaseId
   const user = auth.user
-  console.log(user)
   if (!user?.notionToken) {
     response.status(500)
     return
@@ -251,7 +246,6 @@ Route.post('/notion/database-uri', async ({ response, request, auth }) => {
   if (databaseId) {
     user.notionTableUri = databaseId
     user.save()
-    console.log(user?.notionTableUri)
   }
 }).middleware('auth:web')
 
@@ -259,7 +253,6 @@ Route.post('/notion/database-uri', async ({ response, request, auth }) => {
 Route.post('/notion/search', async ({ auth }) => {
   const user = auth.user
   if (user?.notionToken) {
-    console.log(user.notionToken)
     const notion = new Client({
       auth: user.notionToken
     })
@@ -269,15 +262,6 @@ Route.post('/notion/search', async ({ auth }) => {
         value: "database"
       }
     })
-    /**
-     * {
-        object: 'list',
-        results: [ { object: 'page', id: 'd321f629-8f6c-4dd3-bcec-83999eecaec2' } ],
-        next_cursor: null,
-        has_more: false
-      }
-     */
-    console.log(results)
   }
 }).middleware('auth:web')
 

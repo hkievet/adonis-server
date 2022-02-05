@@ -2,6 +2,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import HnStory from 'App/Models/HnStory'
 import fetch from 'node-fetch';
 import { Client } from '@notionhq/client'
+import Favorite from 'App/Models/Favorite';
 
 async function addDatabaseItem(title: string, url: string, databaseId: string, notionToken: string) {
     const notion = new Client({
@@ -27,15 +28,19 @@ async function addDatabaseItem(title: string, url: string, databaseId: string, n
                 }
             },
         })
-        console.log("Success! Entry added.")
     } catch (error) {
         console.error(error.body)
     }
 }
 
 export default class HackerNewsController {
-    public async index({ bouncer }) {
+    public async index({ bouncer, auth }: HttpContextContract) {
         await bouncer.authorize('heezyklovaday')
+        const user = auth.user
+        if (!user) {
+            return
+        }
+        await user.load('stories')
         let url = 'https://hacker-news.firebaseio.com/v0/topstories.json';
         async function getStories(): Promise<number[]> {
             try {
@@ -49,41 +54,49 @@ export default class HackerNewsController {
 
         const data = await getStories()
 
-        // combine each id with the database, or make a new entry...
-        // const existing = await (await HnStory.query().whereIn('hnId', data))
-
         const entries = data.map((hnId) => {
             return {
                 hnId
             }
         })
 
-        const items = await HnStory.updateOrCreateMany('hnId', entries)
+        const items = await HnStory.fetchOrCreateMany('hnId', entries)
+        user.load('stories')
+        const mapped = user.stories.map(s => s.id)
 
         const populatedItems = await Promise.all(items.map(async (i) => {
             const storyData = await i.getStoryData()
             return {
-                ...i.$attributes,
-                ...storyData
+                ...i.serialize(),
+                ...storyData,
+                isFavorited: mapped.includes(i.id)
             }
         }))
 
 
         return populatedItems
     }
-    public async store({ request, bouncer }: HttpContextContract) {
+    public async store({ request, bouncer, auth }: HttpContextContract) {
         await bouncer.authorize('heezyklovaday')
-        if (request.hasBody()) {
+        const user = auth.user
+        if (request.hasBody() && user) {
             const body = request.body()
             if (body.hnId && body.isFavorited) {
                 const story = new HnStory()
                 story.hnId = body.hnId
-                story.isFavorited = body.isFavorited
                 const storyData = await story.getStoryData()
                 story.title = storyData.title
                 story.hnUrl = storyData.url
                 try {
                     story.save()
+                } catch (e) {
+                    console.error(e)
+                }
+                const favorite = new Favorite()
+                favorite.userId = user.id
+                favorite.hnstoriesId = story.id
+                try {
+                    favorite.save()
                 } catch (e) {
                     console.error(e)
                 }
@@ -98,10 +111,20 @@ export default class HackerNewsController {
             const body = request.body()
             if (body.isFavorited !== undefined) {
                 const existing = await HnStory.findByOrFail('hnId', id)
-                existing.isFavorited = body.isFavorited
                 existing.save()
                 const storyData = await existing.getStoryData()
-                if (existing.isFavorited) {
+                const favorite = await Favorite.firstOrNew({ userId: user.id, hnstoriesId: existing.id })
+                if (!body.isFavorited) {
+                    await favorite.delete()
+                }
+                if (!favorite.id && body.isFavorited) {
+                    favorite.userId = user.id
+                    favorite.hnstoriesId = existing.id
+                    try {
+                        favorite.save()
+                    } catch (e) {
+                        console.error(e)
+                    }
                     await addDatabaseItem(storyData.title, storyData.url,
                         user.notionTableUri, user.notionToken)
 
