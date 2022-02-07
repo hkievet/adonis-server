@@ -25,6 +25,7 @@ import allyConfig from 'Config/ally';
 import User from 'App/Models/User';
 import Env from '@ioc:Adonis/Core/Env'
 import { Client } from '@notionhq/client/build/src';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export const PDX_COORDS = {
   lat: 45.5152,
@@ -33,6 +34,26 @@ export const PDX_COORDS = {
 
 Route.group(() => {
   Route.resource('hn_news', 'HackerNewsController')
+}).middleware('auth:web')
+
+Route.get('favorites', async ({ auth, bouncer }: HttpContextContract) => {
+  await bouncer.authorize('heezyklovaday')
+  const user = auth.user
+  if (!user) {
+    return
+  }
+  await user.load('stories')
+  if (user) {
+    await user.load('stories')
+    return await Promise.all(user.stories.map(async s => {
+      const storyData = await s.getStoryData(); return {
+        ...s.serialize(),
+        ...storyData,
+        isFavorited: true
+      }
+    }))
+    // }
+  }
 }).middleware('auth:web')
 
 Route.get('/', async () => {
@@ -169,9 +190,9 @@ Route.get('/github/checkToken', async ({ request, ally, auth }) => {
     const githubUser = await ally
       .use('github')
       .userFromToken(token)
-    console.log('hello')
 
     if (!githubUser.email || !githubUser.token.token) {
+      console.log("expected github email and token...")
       return
     }
 
@@ -196,7 +217,6 @@ Route.get("/isLoggedIn", async ({ auth }) => {
   try {
     await auth.use('web').authenticate()
   } catch (e) {
-
   }
   return { loggedIn: auth.use('web').isLoggedIn }
 })
@@ -269,7 +289,7 @@ Route.post('/notion/database-uri', async ({ response, request, auth }) => {
 Route.get('/notion/settings', async ({ auth }) => {
   const user = auth.user
   const results = {
-    isAuthenticated: !!user,
+    isAuthenticated: user?.email,
     notionAuthenticated: false,
     notionPages: [] as string[],
     selectedNotionPage: "",
@@ -288,6 +308,7 @@ Route.get('/notion/settings', async ({ auth }) => {
     })
 
     if (searchResults) {
+      console.log(JSON.stringify(searchResults))
       results.notionPages = searchResults.results.map((result) => {
         return result.id
       })

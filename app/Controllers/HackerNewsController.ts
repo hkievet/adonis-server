@@ -29,7 +29,17 @@ async function addDatabaseItem(title: string, url: string, databaseId: string, n
             },
         })
     } catch (error) {
-        console.error(error.body)
+        throw error
+    }
+}
+async function getStories(): Promise<number[]> {
+    let url = 'https://hacker-news.firebaseio.com/v0/topstories.json';
+    try {
+        const response = await fetch(url);
+        const data = (await response.json()) as number[];
+        return data.slice(0, 25);
+    } catch (e) {
+        throw Error("Couldn't fetch stories.");
     }
 }
 
@@ -41,16 +51,7 @@ export default class HackerNewsController {
             return
         }
         await user.load('stories')
-        let url = 'https://hacker-news.firebaseio.com/v0/topstories.json';
-        async function getStories(): Promise<number[]> {
-            try {
-                const response = await fetch(url);
-                const data = (await response.json()) as number[];
-                return data.slice(0, 25);
-            } catch (e) {
-                throw Error("Couldn't fetch stories.");
-            }
-        }
+
 
         const data = await getStories()
 
@@ -61,11 +62,13 @@ export default class HackerNewsController {
         })
 
         const items = await HnStory.fetchOrCreateMany('hnId', entries)
-        user.load('stories')
+        await user.load('stories')
         const mapped = user.stories.map(s => s.id)
 
         const populatedItems = await Promise.all(items.map(async (i) => {
             const storyData = await i.getStoryData()
+            i.title = storyData.title;
+            await i.save()
             return {
                 ...i.serialize(),
                 ...storyData,
@@ -76,6 +79,7 @@ export default class HackerNewsController {
 
         return populatedItems
     }
+
     public async store({ request, bouncer, auth }: HttpContextContract) {
         await bouncer.authorize('heezyklovaday')
         const user = auth.user
