@@ -184,16 +184,21 @@ Route.get('/github/checkToken', async ({ request, ally, auth }) => {
     const payload = { client_id: allyConfig.github.clientId, code: code, client_secret: allyConfig.github.clientSecret, redirect_uri: `${Env.get('CLIENT_SITE')}/success`, scope: `user:email` }
     // const payload = { client_id: allyConfig.github.clientId, code: code, client_secret: allyConfig.github.clientSecret }
     let urlParameters = Object.entries(payload).map(e => e.join('=')).join('&');
-    const response = await fetch(`https://github.com/login/oauth/access_token?${urlParameters}`, { method: "post" })
-    const data = await response.text()
+    let data
+    try {
+      const response = await fetch(`https://github.com/login/oauth/access_token?${urlParameters}`, { method: "post" })
+      data = await response.text()
+    } catch (e) {
+      console.error("Error authenticating with github")
+      throw e
+    }
     const token = data.split('=')[1].split('&')[0]
     const githubUser = await ally
       .use('github')
       .userFromToken(token)
 
-    if (!githubUser.email || !githubUser.token.token) {
-      console.log("expected github email and token...")
-      return
+    if (!githubUser.email || !githubUser.token.token || !githubUser.emailVerificationState) {
+      throw new Error("Expected token and email from github..")
     }
 
     const verified = githubUser.emailVerificationState
@@ -209,8 +214,9 @@ Route.get('/github/checkToken', async ({ request, ally, auth }) => {
     })
 
     await auth.use('web').login(user, true)
-    return
+    return { success: true }
   }
+  return { success: false }
 })
 
 Route.get("/isLoggedIn", async ({ auth }) => {
