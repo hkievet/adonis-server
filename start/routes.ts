@@ -45,13 +45,15 @@ Route.get('favorites', async ({ auth, bouncer }: HttpContextContract) => {
   await user.load('stories')
   if (user) {
     await user.load('stories')
-    return await Promise.all(user.stories.map(async s => {
+    user.stories.sort((a, b) => { return a.createdAt < b.createdAt ? 1 : -1 })
+    const data = await Promise.all(user.stories.map(async s => {
       const storyData = await s.getStoryData(); return {
         ...s.serialize(),
         ...storyData,
         isFavorited: true
       }
     }))
+    return data
     // }
   }
 }).middleware('auth:web')
