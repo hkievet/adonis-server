@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import { Client } from '@notionhq/client'
 import Favorite from 'App/Models/Favorite';
 
-async function addDatabaseItem(title: string, url: string, databaseId: string, notionToken: string) {
+async function addDatabaseItem(title: string, url: string, databaseId: string, notionToken: string, hnId: number) {
     const notion = new Client({
         auth: notionToken,
     })
@@ -12,7 +12,8 @@ async function addDatabaseItem(title: string, url: string, databaseId: string, n
         throw Error("No databaseId setup for Notion")
     }
     try {
-        await notion.pages.create({
+        const datestring = new Date()
+        const results = await notion.pages.create({
             parent: {
                 "type": "database_id",
                 "database_id": databaseId
@@ -25,9 +26,18 @@ async function addDatabaseItem(title: string, url: string, databaseId: string, n
                 },
                 "Url": {
                     "url": url
+                },
+                "Date Added": {
+                    type: "date",
+                    date: {
+                        start: datestring
+                    }
+                },
+                "HN Comments": {
+                    "url": `https://news.ycombinator.com/item?id=${hnId}`
                 }
             },
-        })
+        } as any)
     } catch (error) {
         throw error
     }
@@ -124,13 +134,14 @@ export default class HackerNewsController {
                 if (!favorite.id && body.isFavorited) {
                     favorite.userId = user.id
                     favorite.hnstoriesId = existing.id
+                    existing.hnUrl
                     try {
                         favorite.save()
                     } catch (e) {
                         console.error(e)
                     }
                     await addDatabaseItem(storyData.title, storyData.url,
-                        user.notionTableUri, user.notionToken)
+                        user.notionTableUri, user.notionToken, existing.hnId)
 
                 }
                 return { ...existing.$attributes, ...storyData }

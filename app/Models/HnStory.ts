@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, ManyToMany, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, computed, ManyToMany, manyToMany } from '@ioc:Adonis/Lucid/Orm'
 import fetch from 'node-fetch'
 import User from './User'
 
@@ -38,6 +38,11 @@ export default class HnStory extends BaseModel {
     pivotForeignKey: 'hnstories_id',
   })
   public users: ManyToMany<typeof User>
+
+  @computed()
+  public get getHnUrl() {
+    return `https://news.ycombinator.com/item?id=${this.hnId}`
+  }
 
 
   public getStoryData() {
