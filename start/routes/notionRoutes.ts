@@ -35,7 +35,7 @@ Route.get('/notion/settings', async ({ auth }) => {
     return results
 }).middleware('auth:web')
 
-Route.get('/notion/makeTable', async ({ auth }) => {
+Route.get('/notion/makeTable', async () => {
     // stub
 }).middleware('auth:web')
 

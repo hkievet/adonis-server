@@ -13,7 +13,7 @@ async function addDatabaseItem(title: string, url: string, databaseId: string, n
     }
     try {
         const datestring = new Date()
-        const results = await notion.pages.create({
+        await notion.pages.create({
             parent: {
                 "type": "database_id",
                 "database_id": databaseId
