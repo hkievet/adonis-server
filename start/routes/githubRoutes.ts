@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route'
 import allyConfig from 'Config/ally';
 import User from 'App/Models/User';
 import Env from '@ioc:Adonis/Core/Env'
+import fetch from "node-fetch"
 
 Route.get('/github/redirect', async ({ ally }) => {
     return ally.use('github').redirect()

@@ -5,7 +5,7 @@ import { Client } from '@notionhq/client/build/src';
 Route.get('/notion/settings', async ({ auth }) => {
     const user = auth.user
     const results = {
-        isAuthenticated: user?.email,
+        isAuthenticated: user?.email || "",
         notionAuthenticated: false,
         notionPages: [] as string[],
         selectedNotionPage: "",
