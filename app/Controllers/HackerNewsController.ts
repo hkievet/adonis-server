@@ -62,7 +62,6 @@ export default class HackerNewsController {
         }
         await user.load('stories')
 
-
         const data = await getStories()
 
         const entries = data.map((hnId) => {
