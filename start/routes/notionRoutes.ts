@@ -1,6 +1,7 @@
 import Route from '@ioc:Adonis/Core/Route'
 import Env from '@ioc:Adonis/Core/Env'
 import { Client } from '@notionhq/client/build/src';
+import fetch from 'node-fetch'
 
 Route.get('/notion/settings', async ({ auth }) => {
     const user = auth.user
@@ -50,7 +51,7 @@ Route.post('/notion/authenticate', async ({ request, auth }) => {
     try {
         const results = await fetch("https://api.notion.com/v1/oauth/token", {
             method: "post",
-            headers: new Headers({ "Authorization": authPayload, 'Content-Type': 'application/json' }),
+            headers: { "Authorization": authPayload, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 code,
                 "grant_type": "authorization_code",
@@ -61,6 +62,8 @@ Route.post('/notion/authenticate', async ({ request, auth }) => {
         if (data['access_token'] && user) {
             user.notionToken = data["access_token"]
             user.save()
+        } else {
+            console.log(data)
         }
     } catch (e) {
         console.error(e)
@@ -70,6 +73,7 @@ Route.post('/notion/authenticate', async ({ request, auth }) => {
 
 Route.post('/notion/database-uri', async ({ response, request, auth }) => {
     const body = request.body()
+    console.log(body)
     let databaseId = body.databaseId
     const user = auth.user
     if (!user?.notionToken) {
