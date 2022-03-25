@@ -30,8 +30,8 @@ import User from 'App/Models/User'
 | NOTE: Always export the "actions" const from this file
 |****************************************************************
 */
-export const { actions } = Bouncer.define('heezyklovaday', (user: User) => {
-    return !!user.email
+export const { actions } = Bouncer.define('hasAnEmail', (user: User) => {
+  return !!user.email
 })
 
 /*

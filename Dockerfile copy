@@ -1,0 +1,57 @@
+FROM debian:bullseye as builder
+
+ARG NODE_VERSION=16.16.0
+ARG YARN_VERSION=1.22.19
+
+RUN apt-get update; apt install -y curl
+# RUN curl https://get.volta.sh | bash
+# ENV VOLTA_HOME /root/.volta
+# ENV PATH /root/.volta/bin:$PATH
+# RUN volta install node@${NODE_VERSION} yarn@${YARN_VERSION}
+RUN mkdir -p /root/nvm
+ENV NVM_DIR /root/nvm
+# IMPORTANT: set the exact version
+ENV NODE_VERSION v16.17.0
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
+# add node and npm to the PATH
+ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/bin
+ENV PATH $NODE_PATH:$PATH
+RUN npm -v
+RUN node -v
+RUN which node
+RUN npm install -g yarn
+
+
+
+#######################################################################
+
+RUN mkdir /app
+WORKDIR /app
+
+# Yarn will not install any package listed in "devDependencies" when NODE_ENV is set to "production"
+# to install all modules: "yarn install --production=false"
+# Ref: https://classic.yarnpkg.com/lang/en/docs/cli/install/#toc-yarn-install-production-true-false
+
+# ENV NODE_ENV production
+
+COPY . .
+
+RUN yarn && yarn build
+FROM debian:bullseye
+
+LABEL fly_launch_runtime="nodejs"
+
+# COPY --from=builder /root/.volta /root/.volta
+COPY --from=builder /app /app
+COPY --from=builder /root/nvm /root/nvm
+
+WORKDIR /app
+ENV NODE_ENV production
+ENV NVM_DIR /root/nvm
+ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/bin
+ENV PATH $NODE_PATH:$PATH
+# ENV PATH /root/nvm/bin:$ATH
+
+
+CMD [ "node", "build/server.js && node build/ace migration:run" ]

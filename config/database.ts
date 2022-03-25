@@ -8,23 +8,17 @@
 import Env from '@ioc:Adonis/Core/Env'
 import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
 
-import { parse, ConnectionOptions } from "pg-connection-string"
+import { parse, ConnectionOptions } from 'pg-connection-string'
 let dbCreds: Partial<ConnectionOptions> = {}
 try {
   dbCreds = parse(Env.get('DATABASE_URL'))
-} catch (e) {
-}
-
-
-// dbCreds.host = dbCreds.host ? dbCreds.host : Env.get('PG_HOST')
-// dbCreds.port = (dbCreds.port ? dbCreds.port : Env.get('PG_PORT')) as any
-// dbCreds.user = dbCreds.user ? dbCreds.user : Env.get('PG_USER')
-// dbCreds.password = dbCreds.password ? dbCreds.password : Env.get('PG_PASSWORD')
-// dbCreds.database = dbCreds.database ? dbCreds.database : Env.get('PG_DB_NAME')
-
-const sslProp = Object.keys(dbCreds).length ? {
-  rejectUnauthorized: false
-} : undefined
+  console.log(dbCreds)
+} catch (e) {}
+// const sslProp = Object.keys(dbCreds).length
+//   ? {
+//       rejectUnauthorized: false,
+//     }
+//   : undefined
 
 const databaseConfig: DatabaseConfig = {
   /*
@@ -59,7 +53,6 @@ const databaseConfig: DatabaseConfig = {
         user: dbCreds.user || Env.get('PG_USER'),
         password: dbCreds.password || Env.get('PG_PASSWORD', ''),
         database: dbCreds.database || Env.get('PG_DB_NAME'),
-        ssl: sslProp
       },
       migrations: {
         naturalSort: true,
@@ -67,9 +60,7 @@ const databaseConfig: DatabaseConfig = {
       healthCheck: false,
       debug: false,
     },
-
-  }
+  },
 }
-
 
 export default databaseConfig

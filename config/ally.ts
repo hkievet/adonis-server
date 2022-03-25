@@ -8,7 +8,6 @@
 import Env from '@ioc:Adonis/Core/Env'
 import { AllyConfig } from '@ioc:Adonis/Addons/Ally'
 
-
 /*
 |--------------------------------------------------------------------------
 | Ally Config
@@ -19,18 +18,18 @@ import { AllyConfig } from '@ioc:Adonis/Addons/Ally'
 |
 */
 const allyConfig: AllyConfig = {
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Github driver
     |--------------------------------------------------------------------------
     */
-    github: {
-        driver: 'github',
-        clientId: Env.get('GITHUB_CLIENT_ID'),
-        clientSecret: Env.get('GITHUB_CLIENT_SECRET'),
-        callbackUrl: `${Env.get('CLIENT_SITE')}/success`,
-        scopes: ['user:email']
-    },
+  github: {
+    driver: 'github',
+    clientId: Env.get('GITHUB_CLIENT_ID'),
+    clientSecret: Env.get('GITHUB_CLIENT_SECRET'),
+    callbackUrl: `${Env.get('CLIENT_SITE')}/success`,
+    scopes: ['user:email'],
+  },
 }
 
 export default allyConfig
